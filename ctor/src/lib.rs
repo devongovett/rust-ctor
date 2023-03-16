@@ -32,7 +32,7 @@ extern crate syn;
 #[macro_use]
 extern crate quote;
 
-use proc_macro::{TokenStream};
+use proc_macro::TokenStream;
 
 /// Attributes required to mark a function as a constructor. This may be exposed in the future if we determine
 /// it to be stable.
@@ -170,7 +170,7 @@ pub fn ctor(_attribute: TokenStream, function: TokenStream) -> TokenStream {
 
         let tokens = ctor_attributes!();
         let output = quote!(
-            #[cfg(not(any(target_os = "linux", target_os = "android", target_os = "freebsd", target_os = "netbsd", target_os = "openbsd", target_os = "dragonfly", target_os = "illumos", target_os = "haiku", target_os = "macos", target_os = "ios", windows)))]
+            #[cfg(not(any(target_os = "linux", target_os = "android", target_os = "freebsd", target_os = "netbsd", target_os = "openbsd", target_os = "dragonfly", target_os = "illumos", target_os = "haiku", target_os = "macos", target_os = "ios", target_arch = "wasm32", windows)))]
             compile_error!("#[ctor] is not supported on the current target");
 
             #(#attrs)*
@@ -185,6 +185,7 @@ pub fn ctor(_attribute: TokenStream, function: TokenStream) -> TokenStream {
             unsafe extern "C" fn() =
             {
                 #[cfg_attr(any(target_os = "linux", target_os = "android"), link_section = ".text.startup")]
+                #[cfg_attr(target_arch = "wasm32", no_mangle)]
                 unsafe extern "C" fn #ctor_ident() { #ident() };
                 #ctor_ident
             }
@@ -227,7 +228,7 @@ pub fn ctor(_attribute: TokenStream, function: TokenStream) -> TokenStream {
 
         let tokens = ctor_attributes!();
         let output = quote!(
-            #[cfg(not(any(target_os = "linux", target_os = "android", target_os = "freebsd", target_os = "netbsd", target_os = "openbsd", target_os = "dragonfly", target_os = "illumos", target_os = "haiku", target_os = "macos", target_os = "ios", windows)))]
+            #[cfg(not(any(target_os = "linux", target_os = "android", target_os = "freebsd", target_os = "netbsd", target_os = "openbsd", target_os = "dragonfly", target_os = "illumos", target_os = "haiku", target_os = "macos", target_os = "ios", target_arch = "wasm32", windows)))]
             compile_error!("#[ctor] is not supported on the current target");
 
             // This is mutable, but only by this macro code!
@@ -321,7 +322,7 @@ pub fn dtor(_attribute: TokenStream, function: TokenStream) -> TokenStream {
 
     let tokens = ctor_attributes!();
     let output = quote!(
-        #[cfg(not(any(target_os = "linux", target_os = "android", target_os = "freebsd", target_os = "netbsd", target_os = "openbsd", target_os = "dragonfly", target_os = "illumos", target_os = "haiku", target_os = "macos", target_os = "ios", windows)))]
+        #[cfg(not(any(target_os = "linux", target_os = "android", target_os = "freebsd", target_os = "netbsd", target_os = "openbsd", target_os = "dragonfly", target_os = "illumos", target_os = "haiku", target_os = "macos", target_os = "ios", target_arch = "wasm32", windows)))]
         compile_error!("#[dtor] is not supported on the current target");
 
         #(#attrs)*
